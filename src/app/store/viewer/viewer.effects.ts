@@ -1,21 +1,30 @@
 import { Injectable } from '@angular/core';
+import * as DrawingUtils from '@mediapipe/drawing_utils';
+import {
+  Pose,
+  POSE_LANDMARKS,
+  POSE_LANDMARKS_LEFT,
+  POSE_LANDMARKS_RIGHT,
+  Results,
+} from '@mediapipe/pose';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { BrowserParamsService } from '../../utils/browser-params.service';
-import { VideoService } from './video.service';
-import { State, Status } from './viewer.state';
-import * as ViewerActions from './viewer.actions';
 import { delay, tap } from 'rxjs';
-import { Results, SelfieSegmentation } from '@mediapipe/selfie_segmentation';
+import { BrowserParamsService } from '../../utils/browser-params.service';
+import { COLOR_LEFT, COLOR_NEUTRAL, COLOR_RIGHT, MY_LEFT_POSEINDEX, MY_NEUTRAL_POSEINDEX, MY_POSE_CONNECTIONS, MY_POSE_CONNECTIONS_PERSON_LEFT, MY_POSE_CONNECTIONS_PERSON_RIGHT, MY_RIGHT_POSEINDEX, PoseService } from './pose.service';
+import { VideoService } from './video.service';
+import * as ViewerActions from './viewer.actions';
+import { State, Status } from './viewer.state';
 
 @Injectable()
 export class ViewerEffects {
-  selfie_segmentation_ready = false;
-  selfie_segmentation: SelfieSegmentation | null = null;
+  pose_ready = false;
+  pose: Pose | null = null;
 
   constructor(
     private browserParams: BrowserParamsService,
     private videoService: VideoService,
+    private poseService: PoseService,
     private actions$: Actions,
     private store: Store<State>
   ) {}
@@ -28,32 +37,10 @@ export class ViewerEffects {
         tap(() => {
           //console.log('Effect on init');
 
-          // Initial the webcam
-          navigator.mediaDevices
-            .getUserMedia({
-              video: {
-                facingMode: localStorage.getItem('videoCamera') || 'user',
-                height: parseInt(
-                  localStorage.getItem('videoQuality') || '720p'
-                ),
-              },
-            })
-            .then((media_stream) => {
-
-              // Assign media stream to video element - with audio muted
-              this.videoService.liveVideo!.srcObject = media_stream;
-              this.videoService.liveVideo!.muted = true;
-
-              this.videoService.liveVideo!.onplay =
-                this.playingFrame.bind(this);
-
-              // And start playing
-              this.videoService.liveVideo!.play();
-
-              this.store.dispatch(
-                ViewerActions.initVideoDone()
-              );
-
+          this.videoService
+            .initInputVideo(this.playingFrame.bind(this))
+            .then(() => {
+              this.store.dispatch(ViewerActions.initVideoDone());
             })
             .catch((e) => {
               if (
@@ -89,20 +76,24 @@ export class ViewerEffects {
         tap(() => {
           // initial the selfie segmentation
           // setTimeout(() => {
-          this.selfie_segmentation = new SelfieSegmentation({
+          this.pose = new Pose({
             locateFile: (file) => {
-              return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
+              return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
             },
           });
-          this.selfie_segmentation.setOptions({ modelSelection: 1 });
-          this.selfie_segmentation.onResults(this.on_results.bind(this));
-          this.selfie_segmentation_ready = true;
-          // },1000)
+          this.pose.setOptions({
+            selfieMode: false,
+            modelComplexity: 1,
+            smoothLandmarks: true,
+            enableSegmentation: false,
+            smoothSegmentation: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+          });
+          this.pose.onResults(this.on_results.bind(this));
+          this.pose_ready = true;
 
-          this.store.dispatch(
-            ViewerActions.initFinished({ now: new Date() })
-          );
-
+          this.store.dispatch(ViewerActions.initFinished({ now: new Date() }));
         })
       ),
     { dispatch: false }
@@ -112,8 +103,17 @@ export class ViewerEffects {
   async playingFrame() {
     // console.log(this);
 
-    if (this.selfie_segmentation_ready && this.videoService.liveVideo) {
-      await this.selfie_segmentation!.send({
+    if (
+      this.pose_ready &&
+      this.videoService.liveVideo &&
+      this.videoService.outputCanvas
+    ) {
+      this.videoService.outputCanvas.width =
+        this.videoService.liveVideo?.videoWidth;
+      this.videoService.outputCanvas.height =
+        this.videoService.liveVideo?.videoHeight;
+
+      await this.pose!.send({
         image: this.videoService.liveVideo!,
       });
     }
@@ -122,13 +122,12 @@ export class ViewerEffects {
     });
   }
 
+  
+
   async on_results(results: Results) {
     // console.log(results);
     // console.log(this);
-
-    const c = this.videoService.canvasMask;
-    const ctx = c!.getContext('2d');
-    ctx!.clearRect(0, 0, c!.width, c!.height);
-    ctx!.drawImage(results.segmentationMask, 0, 0, c!.width, c!.height);
+    this.poseService.drawCanvas(results);
+  
   }
 }

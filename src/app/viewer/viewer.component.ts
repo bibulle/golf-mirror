@@ -34,10 +34,11 @@ export class ViewerComponent implements OnInit {
 }
 
   ngOnInit(): void {
+    this.videoService.liveVideo = document.querySelector('#live') as HTMLVideoElement;
+    this.videoService.outputCanvas = document.querySelector('#output-canvas') as HTMLCanvasElement;
+
     this.store.dispatch(ViewerActions.init());
 
-    this.videoService.liveVideo = document.querySelector('#live') as HTMLVideoElement;
-    this.videoService.canvasMask = document.querySelector('#canvas-mask') as HTMLCanvasElement;
   }
 
 }
