@@ -12,6 +12,7 @@ export class VideoService {
   mediaRecorder: MediaRecorder | undefined;
   video: HTMLVideoElement | undefined;
   outputCanvas: HTMLCanvasElement | undefined;
+  gridCanvas: HTMLCanvasElement | undefined;
   liveVideo: HTMLVideoElement | undefined;
   preview: HTMLVideoElement | undefined;
   bufferSource: MediaSource | undefined;
@@ -61,7 +62,7 @@ export class VideoService {
           .getUserMedia({
             video: {
               facingMode: localStorage.getItem('videoCamera') || 'user',
-              height: parseInt(localStorage.getItem('videoQuality') || '720p'),
+              height: parseInt(localStorage.getItem('videoQuality') || '1080p'),
             },
           })
           .then((media_stream) => {

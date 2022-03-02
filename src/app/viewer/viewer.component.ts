@@ -36,6 +36,7 @@ export class ViewerComponent implements OnInit {
   ngOnInit(): void {
     this.videoService.liveVideo = document.querySelector('#live') as HTMLVideoElement;
     this.videoService.outputCanvas = document.querySelector('#output-canvas') as HTMLCanvasElement;
+    this.videoService.gridCanvas = document.querySelector('#landmark-grid-container') as HTMLCanvasElement;
 
     this.store.dispatch(ViewerActions.init());
 

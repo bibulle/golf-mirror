@@ -18,6 +18,7 @@
     "@angular/platform-browser": "~13.2.0",
     "@angular/platform-browser-dynamic": "~13.2.0",
     "@angular/router": "~13.2.0",
+    "@mediapipe/control_utils_3d": "^0.3.1635987963",
     "@mediapipe/drawing_utils": "^0.3.1620248257",
     "@mediapipe/pose": "^0.5.1635988162",
     "@mediapipe/selfie_segmentation": "^0.1.1632777926",
@@ -25,6 +26,7 @@
     "@ngrx/store": "^13.0.2",
     "@types/dom-mediacapture-record": "^1.0.11",
     "rxjs": "~7.5.0",
+    "three": "^0.138.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },
@@ -34,6 +36,7 @@
     "@angular/compiler-cli": "~13.2.0",
     "@types/jasmine": "~3.10.0",
     "@types/node": "^12.11.1",
+    "@types/three": "^0.137.0",
     "jasmine-core": "~4.0.0",
     "karma": "~6.3.0",
     "karma-chrome-launcher": "~3.1.0",

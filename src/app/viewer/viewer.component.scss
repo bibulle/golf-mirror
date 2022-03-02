@@ -1,0 +1,42 @@
+.container-result {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  // background-color: gray;
+  top:0;
+  bottom: 0;
+
+  display: flex;
+  justify-content: space-around;
+
+  canvas {
+    height: 100%;
+    width: auto;
+  }
+}
+
+.container-live {
+  position: absolute;
+  max-height: 20vh;
+  bottom: 0;
+  left: 0;
+
+
+  video {
+    max-height: 20vh;
+  }
+}
+
+.container-grid {
+  position: absolute;
+  width: 50vh;
+  height: 50vh;
+  top: 0;
+  right: 0;
+   background-color: aliceblue;
+
+  canvas {
+    max-height: 20vh;
+  }
+
+}
