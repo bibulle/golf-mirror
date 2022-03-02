@@ -6,8 +6,8 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { delay, tap } from 'rxjs';
 import { BrowserParamsService } from '../../utils/browser-params.service';
-import { PoseService } from './pose.service';
-import { VideoService } from './video.service';
+import { PoseService } from '../../pose/pose.service';
+import { VideoService } from '../../video/video.service';
 import * as ViewerActions from './viewer.actions';
 import { State, Status } from './viewer.state';
 
@@ -124,9 +124,7 @@ export class ViewerEffects {
     // console.log(this);
     this.poseService.enhanceResults(results);
 
-    this.poseService.drawCanvas(results);
-
-    this.poseService.drawGrid(results);
+    this.poseService.drawPoses(results);
 
   }
 }

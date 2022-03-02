@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { map, Observable } from 'rxjs';
-import { VideoService } from '../store/viewer/video.service';
+import { VideoService } from '../video/video.service';
 import * as ViewerSelectors from '../store/viewer/viewer.selectors';
 import * as ViewerActions from '../store/viewer/viewer.actions';
 import { State, Status, ViewerState } from '../store/viewer/viewer.state';
