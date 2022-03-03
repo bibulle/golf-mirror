@@ -16,6 +16,8 @@
 }
 
 .container-live {
+  // display: none;
+
   position: absolute;
   max-height: 20vh;
   bottom: 0;
@@ -28,15 +30,44 @@
 }
 
 .container-grid {
+  // display: none;
   position: absolute;
   width: 50vh;
   height: 50vh;
   top: 0;
   right: 0;
-   background-color: aliceblue;
 
   canvas {
     max-height: 20vh;
   }
 
 }
+
+.container-values {
+  z-index: 10;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+
+  .label {
+    display: flex;
+    flex-direction: row;
+
+    .label-1 {
+      min-width: 4.5em;
+    }
+    .label-2 {
+      min-width: 1.5em;
+    }
+    .value {
+      min-width: 3em;
+      text-align: right;
+    }
+  }
+}
+.green{
+  background-color: greenyellow;
+} 

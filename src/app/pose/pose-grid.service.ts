@@ -35,14 +35,12 @@ export class PoseGridService {
   initGrid(gridCanvas: HTMLCanvasElement) {
     this.camera.position.z = 2;
 
-    // console.log(gridCanvas!.width);
-    // console.log(gridCanvas!.clientWidth);
-
     this.renderer.setSize(gridCanvas!.clientWidth, gridCanvas!.clientHeight);
     gridCanvas!.appendChild(this.renderer.domElement);
   }
 
   drawGrid(results: Results) {
+
     if (results.poseWorldLandmarks) {
       // First create the the connectors and points
       if (this.scene.children.length === 0) {
@@ -84,6 +82,8 @@ export class PoseGridService {
         this.spheres.forEach((l) => {
           this.scene.add(l);
         });
+        const axesHelper = new THREE.AxesHelper(5);
+        this.scene.add(axesHelper);
       }
 
       // on each result update the connectors and points
@@ -102,6 +102,7 @@ export class PoseGridService {
       this.spheres.forEach((l) => {
         l.geometry.attributes['position'].needsUpdate = true;
       });
+
 
       // calculate the camera
       // const leftFoot =
@@ -134,12 +135,13 @@ export class PoseGridService {
       //   this.camera.lookAt(0, 0, 0);
       // }
 
-      this.light.position.copy(this.camera.position);
-      this.renderer.render(this.scene, this.camera);
     } else {
       this.hideGridConnectorsAllLines();
     }
-  }
+
+    this.light.position.copy(this.camera.position);
+    this.renderer.render(this.scene, this.camera);
+}
 
   private calculateGridPoints(
     poseConnection: number[],
@@ -256,6 +258,9 @@ export class PoseGridService {
   }
   private hideGridConnectorsAllLines() {
     this.lines.forEach((l) => {
+      l.visible = false;
+    });
+    this.spheres.forEach((l) => {
       l.visible = false;
     });
   }

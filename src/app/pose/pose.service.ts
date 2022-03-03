@@ -7,6 +7,8 @@ import {
   POSE_LANDMARKS_RIGHT,
   Results,
 } from '@mediapipe/pose';
+import * as THREE from 'three';
+import { Angles, PersonAngles } from '../store/viewer/viewer.state';
 import { VideoService } from '../video/video.service';
 import { PoseGridService } from './pose-grid.service';
 import { PoseMarksService } from './pose-marks.service';
@@ -86,6 +88,71 @@ export class PoseService {
     }
   }
 
+  private vertical = new THREE.Vector3(0, 1, 0);
+  private horizontal = new THREE.Vector3(0, 0, 1); //TODO: change to reference feet normal
+
+  calculateAngles(results: Results): { angles?: PersonAngles } {
+    if (!results.poseWorldLandmarks) {
+      return {};
+    }
+
+    const anglesRightForearms = this.getAngles(
+      results.poseWorldLandmarks,
+      POSE_LANDMARKS_LEFT.LEFT_FOOT_INDEX,
+      POSE_LANDMARKS_RIGHT.RIGHT_FOOT_INDEX,
+      POSE_LANDMARKS_RIGHT.RIGHT_SHOULDER,
+      POSE_LANDMARKS_RIGHT.RIGHT_ELBOW
+    );
+    const anglesLeftForearms = this.getAngles(
+      results.poseWorldLandmarks,
+      POSE_LANDMARKS_LEFT.LEFT_FOOT_INDEX,
+      POSE_LANDMARKS_RIGHT.RIGHT_FOOT_INDEX,
+      POSE_LANDMARKS_LEFT.LEFT_SHOULDER,
+      POSE_LANDMARKS_LEFT.LEFT_ELBOW
+    );
+    const anglesRightArms = this.getAngles(
+      results.poseWorldLandmarks,
+      POSE_LANDMARKS_LEFT.LEFT_FOOT_INDEX,
+      POSE_LANDMARKS_RIGHT.RIGHT_FOOT_INDEX,
+      POSE_LANDMARKS_RIGHT.RIGHT_SHOULDER,
+      POSE_LANDMARKS_RIGHT.RIGHT_WRIST
+    );
+    const anglesLeftArms = this.getAngles(
+      results.poseWorldLandmarks,
+      POSE_LANDMARKS_LEFT.LEFT_FOOT_INDEX,
+      POSE_LANDMARKS_RIGHT.RIGHT_FOOT_INDEX,
+      POSE_LANDMARKS_LEFT.LEFT_SHOULDER,
+      POSE_LANDMARKS_LEFT.LEFT_WRIST
+    );
+
+    return {
+      angles: {
+        angleHipsFeet: this.getAngles(
+          results.poseWorldLandmarks,
+          POSE_LANDMARKS_LEFT.LEFT_FOOT_INDEX,
+          POSE_LANDMARKS_RIGHT.RIGHT_FOOT_INDEX,
+          POSE_LANDMARKS_LEFT.LEFT_HIP,
+          POSE_LANDMARKS_RIGHT.RIGHT_HIP
+        ),
+        angleShouldersFeet: this.getAngles(
+          results.poseWorldLandmarks,
+          POSE_LANDMARKS_LEFT.LEFT_FOOT_INDEX,
+          POSE_LANDMARKS_RIGHT.RIGHT_FOOT_INDEX,
+          POSE_LANDMARKS_LEFT.LEFT_SHOULDER,
+          POSE_LANDMARKS_RIGHT.RIGHT_SHOULDER
+        ),
+        angleArmsFeet:
+          anglesRightArms.tot !== NaN
+            ? anglesRightArms
+            : anglesLeftArms.tot !== NaN
+            ? anglesLeftArms
+            : anglesRightForearms.tot !== NaN
+            ? anglesRightForearms
+            : anglesLeftForearms,
+      },
+    };
+  }
+
   drawPoses(results: Results) {
     if (!this.videoService.outputCanvas) {
       throw new Error('No outputcanvas exists');
@@ -96,6 +163,43 @@ export class PoseService {
     this.poseGridService.drawGrid(results);
   }
 
+  getAngles(
+    points: NormalizedLandmarkList,
+    vector1p1: number,
+    vector1p2: number,
+    vector2p1: number,
+    vector2p2: number
+  ): Angles {
+    const vectors1 = this.getVectors(points, vector1p1, vector1p2);
+    const vectors2 = this.getVectors(points, vector2p1, vector2p2);
+
+    return {
+      hor: this.radToDeg(this.signedAngleTo(vectors1.hor, vectors2.hor)),
+      ver: this.radToDeg(this.signedAngleTo(vectors1.ver, vectors2.ver)),
+      tot: this.radToDeg(this.signedAngleTo(vectors1.vec, vectors2.vec)),
+    };
+  }
+  getVectors(
+    points: NormalizedLandmarkList,
+    i1: number,
+    i2: number
+  ): { vec?: THREE.Vector3; hor?: THREE.Vector3; ver?: THREE.Vector3 } {
+    const p1 = points[i1];
+    const p2 = points[i2];
+
+    if (this.getMinVisibility(p1.visibility, p2.visibility)! < 0.6) {
+      return {};
+    }
+
+    const vec = new THREE.Vector3(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
+    const hor = vec.clone().projectOnPlane(this.vertical);
+    const ver = vec.clone().projectOnPlane(this.horizontal);
+    return {
+      vec: vec,
+      hor: hor,
+      ver: ver,
+    };
+  }
   getMidPoint(
     points: NormalizedLandmarkList,
     i1: number,
@@ -117,5 +221,28 @@ export class PoseService {
     } else {
       return Math.min(vis1, vis2);
     }
+  }
+  radToDeg(rad: number): number {
+    return (180.0 * rad) / Math.PI;
+  }
+  getNormal(u: THREE.Vector3, v: THREE.Vector3): THREE.Vector3 {
+    return new THREE.Plane().setFromCoplanarPoints(new THREE.Vector3(), u, v)
+      .normal;
+  }
+  signedAngleTo(
+    u: THREE.Vector3 | undefined,
+    v: THREE.Vector3 | undefined
+  ): number {
+    if (!u || !v) {
+      return NaN;
+    }
+    // Get the signed angle between u and v, in the range [-pi, pi]
+    const angle = u.angleTo(v);
+    const normal = this.getNormal(u, v);
+    return (
+      (normal.z == 0
+        ? normal.y / Math.abs(normal.y)
+        : normal.z / Math.abs(normal.z)) * angle
+    );
   }
 }

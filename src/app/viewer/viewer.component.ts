@@ -5,7 +5,7 @@ import { map, Observable } from 'rxjs';
 import { VideoService } from '../video/video.service';
 import * as ViewerSelectors from '../store/viewer/viewer.selectors';
 import * as ViewerActions from '../store/viewer/viewer.actions';
-import { State, Status, ViewerState } from '../store/viewer/viewer.state';
+import { PersonAngles, State, Status, SwingSide, SwingStatus, ViewerState } from '../store/viewer/viewer.state';
 import { BrowserParamsService } from '../utils/browser-params.service';
 
 @Component({
@@ -17,6 +17,20 @@ export class ViewerComponent implements OnInit {
 
   status$: Observable<Status>;
   isInitialized$: Observable<boolean>;
+
+  angleHipsFeetHorizontal$: Observable<number>
+  angleHipsFeetTotal$: Observable<number>
+  angleHipsFeetVertical$: Observable<number>
+  angleShouldersFeetHorizontal$: Observable<number>
+  angleShouldersFeetTotal$: Observable<number>
+  angleShouldersFeetVertical$: Observable<number>
+  angleArmsFeetHorizontal$: Observable<number>
+  angleArmsFeetTotal$: Observable<number>
+  angleArmsFeetVertical$: Observable<number>
+
+  swingReferencesIsStarted$: Observable<boolean>
+  swingStatus$: Observable<SwingStatus>
+  swingSide$: Observable<SwingSide>
 
   constructor(    browserParams: BrowserParamsService,
     private videoService: VideoService,
@@ -31,6 +45,18 @@ export class ViewerComponent implements OnInit {
     select(ViewerSelectors.viewerStateSelector),
     map((s: ViewerState) => s.isInitialized),
   );
+  this.angleHipsFeetHorizontal$ = store.pipe(select(ViewerSelectors.angleHipsFeetHorizontal));
+  this.angleHipsFeetTotal$ = store.pipe(select(ViewerSelectors.angleHipsFeetTotal));
+  this.angleHipsFeetVertical$ = store.pipe(select(ViewerSelectors.angleHipsFeetVertical));
+  this.angleShouldersFeetHorizontal$ = store.pipe(select(ViewerSelectors.angleShouldersFeetHorizontal));
+  this.angleShouldersFeetTotal$ = store.pipe(select(ViewerSelectors.angleShouldersFeetTotal));
+  this.angleShouldersFeetVertical$ = store.pipe(select(ViewerSelectors.angleShouldersFeetVertical));
+  this.angleArmsFeetHorizontal$ = store.pipe(select(ViewerSelectors.angleArmsFeetHorizontal));
+  this.angleArmsFeetTotal$ = store.pipe(select(ViewerSelectors.angleArmsFeetTotal));
+  this.angleArmsFeetVertical$ = store.pipe(select(ViewerSelectors.angleArmsFeetVertical));
+  this.swingReferencesIsStarted$ = store.pipe(select(ViewerSelectors.swingReferencesIsStarted));
+  this.swingStatus$ = store.pipe(select(ViewerSelectors.swingStatus));
+  this.swingSide$ = store.pipe(select(ViewerSelectors.swingSide));
 }
 
   ngOnInit(): void {

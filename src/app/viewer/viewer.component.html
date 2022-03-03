@@ -1,3 +1,17 @@
+<div class="container-values" [ngClass]="{green: (swingReferencesIsStarted$ | async)}">
+  <div class="label"><div class="label-1">Status</div><div class="label-2"></div> : <div class="value">{{swingStatus$ | async }}</div></div>
+  <div class="label"><div class="label-1">Side</div><div class="label-2"></div> : <div class="value">{{swingSide$ | async }}</div></div>
+  <div class="label"><div class="label-1">Started</div><div class="label-2"></div> : <div class="value">{{swingReferencesIsStarted$ | async }}</div></div>
+  <div class="label"><div class="label-1">Hips</div><div class="label-2">hor</div> : <div class="value">{{angleHipsFeetHorizontal$ | async | number: '1.1-1' }}°</div></div>
+  <div class="label"><div class="label-1"></div><div class="label-2">ver</div> : <div class="value">{{angleHipsFeetVertical$ | async | number: '1.1-1' }}°</div></div>
+  <div class="label"><div class="label-1"></div><div class="label-2">tot</div> : <div class="value">{{angleHipsFeetTotal$ | async | number: '1.1-1' }}°</div></div>
+  <div class="label"><div class="label-1">Shoulders</div><div class="label-2">hor</div> : <div class="value">{{angleShouldersFeetHorizontal$ | async | number: '1.1-1' }}°</div></div>
+  <div class="label"><div class="label-1"></div><div class="label-2">ver</div> : <div class="value">{{angleShouldersFeetVertical$ | async | number: '1.1-1' }}°</div></div>
+  <div class="label"><div class="label-1"></div><div class="label-2">tot</div> : <div class="value">{{angleShouldersFeetTotal$ | async | number: '1.1-1' }}°</div></div>
+  <div class="label"><div class="label-1">Arm</div><div class="label-2">hor</div> : <div class="value">{{angleArmsFeetHorizontal$ | async | number: '1.1-1' }}°</div></div>
+  <div class="label"><div class="label-1"></div><div class="label-2">ver</div> : <div class="value">{{angleArmsFeetVertical$ | async | number: '1.1-1' }}°</div></div>
+  <div class="label"><div class="label-1"></div><div class="label-2">tot</div> : <div class="value">{{angleArmsFeetTotal$ | async | number: '1.1-1' }}°</div></div>
+</div>
 <div class="container-result">
   <canvas id="output-canvas"></canvas>
 </div>
