@@ -27,10 +27,6 @@ export class VideoService {
   constructor(private route: ActivatedRoute) {
     this.route.queryParams.pipe(
       map((params) => {
-
-        // console.log(params);
-        // console.log(Number(params['video']));
-        
         return Number(params['video']);
       }),
     ).subscribe((b) => {

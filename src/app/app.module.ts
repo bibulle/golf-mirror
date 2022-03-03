@@ -10,18 +10,22 @@ import * as ViewerReducer from "./store/viewer/viewer.reducer"
 import { BrowserParamsService } from './utils/browser-params.service';
 import { HomeComponent } from './home/home.component';
 import { ViewerComponent } from './viewer/viewer.component';
+import { PoseModule } from './pose/pose.module';
+import { VideoModule } from './video/video.module';
+import { MyStoreModule } from './store/my-store.module';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent,
-    ViewerComponent
+    // HomeComponent,
+    // ViewerComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    StoreModule.forRoot({viewer: ViewerReducer.reducer}),
-    EffectsModule.forRoot([ViewerEffects])
+    PoseModule,
+    VideoModule,
+    MyStoreModule
 
   ],
   providers: [BrowserParamsService],
