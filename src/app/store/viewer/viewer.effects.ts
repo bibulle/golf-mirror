@@ -7,15 +7,16 @@ import { BrowserParamsService } from "../../utils/browser-params.service";
 import { PoseService } from "../../pose/pose.service";
 import { VideoService } from "../../video/video.service";
 import * as ViewerActions from "./viewer.actions";
-import { State, Status, SwingSide, SwingStatus, ViewerState } from "./viewer.state";
+import { Status, SwingSide, SwingStatus, ViewerState } from "./viewer.state";
 import { anglesHistory, state } from "./viewer.selectors";
+import { MyState } from "../my-state";
 
 @Injectable()
 export class ViewerEffects {
   pose_ready = false;
   pose: Pose | null = null;
 
-  constructor(private browserParams: BrowserParamsService, private videoService: VideoService, private poseService: PoseService, private actions$: Actions, private store: Store<State>) {}
+  constructor(private browserParams: BrowserParamsService, private videoService: VideoService, private poseService: PoseService, private actions$: Actions, private store: Store<MyState>) {}
 
   /* Initialisation */
   init$ = createEffect(

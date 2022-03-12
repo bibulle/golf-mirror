@@ -5,8 +5,9 @@ import { map, Observable } from 'rxjs';
 import { VideoService } from '../video/video.service';
 import * as ViewerSelectors from '../store/viewer/viewer.selectors';
 import * as ViewerActions from '../store/viewer/viewer.actions';
-import { PersonAngles, State, Status, SwingSide, SwingStatus, ViewerState } from '../store/viewer/viewer.state';
+import { PersonAngles, Status, SwingSide, SwingStatus, ViewerState } from '../store/viewer/viewer.state';
 import { BrowserParamsService } from '../utils/browser-params.service';
+import { MyState } from '../store/my-state';
 
 @Component({
   selector: 'app-viewer',
@@ -34,7 +35,7 @@ export class ViewerComponent implements OnInit {
 
   constructor(    browserParams: BrowserParamsService,
     private videoService: VideoService,
-    private store: Store<State>,
+    private store: Store<MyState>,
     private route: ActivatedRoute,
 ) { 
   this.status$ = store.pipe(
