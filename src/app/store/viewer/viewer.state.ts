@@ -1,6 +1,3 @@
-export interface State {
-  viewer: ViewerState;
-}
 
 export interface Angles {
   hor: number;
@@ -68,3 +65,4 @@ export const initialState: ViewerState = {
     timeStop: null
   }
 };
+

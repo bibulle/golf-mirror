@@ -7,15 +7,17 @@ import { BrowserParamsService } from "../../utils/browser-params.service";
 import { PoseService } from "../../pose/pose.service";
 import { VideoService } from "../../video/video.service";
 import * as ViewerActions from "./viewer.actions";
-import { State, Status, SwingSide, SwingStatus, ViewerState } from "./viewer.state";
+import { Status, SwingSide, SwingStatus, ViewerState } from "./viewer.state";
 import { anglesHistory, state } from "./viewer.selectors";
+import { MyState } from "../my-state";
+import { DebugService } from "../debug/debug.service";
 
 @Injectable()
 export class ViewerEffects {
   pose_ready = false;
   pose: Pose | null = null;
 
-  constructor(private browserParams: BrowserParamsService, private videoService: VideoService, private poseService: PoseService, private actions$: Actions, private store: Store<State>) {}
+  constructor(private browserParams: BrowserParamsService, private videoService: VideoService, private poseService: PoseService, private actions$: Actions, private store: Store<MyState>) {}
 
   /* Initialisation */
   init$ = createEffect(
@@ -25,6 +27,7 @@ export class ViewerEffects {
         tap(() => {
           //console.log('Effect on init');
 
+          // init video service
           this.videoService
             .initInputVideo(this.playingFrame.bind(this))
             .then(() => {
@@ -52,6 +55,7 @@ export class ViewerEffects {
     { dispatch: false }
   );
 
+  // Effect on "init video done"
   initMediaPipe$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -59,21 +63,7 @@ export class ViewerEffects {
         delay(1000),
         tap(() => {
           this.pose = this.poseService.initPose(this.on_results.bind(this));
-          // this.pose = new Pose({
-          //   locateFile: (file) => {
-          //     return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-          //   },
-          // });
-          // this.pose.setOptions({
-          //   selfieMode: false,
-          //   modelComplexity: 1,
-          //   smoothLandmarks: true,
-          //   enableSegmentation: false,
-          //   smoothSegmentation: true,
-          //   minDetectionConfidence: 0.5,
-          //   minTrackingConfidence: 0.5,
-          // });
-          // this.pose.onResults(this.on_results.bind(this));
+
           this.pose_ready = true;
 
           this.store.dispatch(ViewerActions.initFinished({ now: new Date() }));
@@ -87,6 +77,7 @@ export class ViewerEffects {
   THRESHOLD_ARM_VERTICAL = 10;
   THRESHOLD_ARM_STILL = 7;
 
+  // Effect of "angles changes" (pose has been found)
   anglesChange$ = createEffect(
     () =>
       this.actions$.pipe(
@@ -236,7 +227,7 @@ export class ViewerEffects {
     { dispatch: false }
   );
 
-  /* Manage a frame */
+  /* Manage a frame  by sending it to pose */
   async playingFrame() {
     // console.log(this);
 
@@ -244,15 +235,21 @@ export class ViewerEffects {
       this.videoService.outputCanvas.width = this.videoService.liveVideo?.videoWidth;
       this.videoService.outputCanvas.height = this.videoService.liveVideo?.videoHeight;
 
-      await this.pose!.send({
-        image: this.videoService.liveVideo!,
-      });
+      // send to image pose
+      if (this.pose != null) {
+        await this.pose.send({
+          image: this.videoService.liveVideo!,
+        });
+      }
     }
+
+    // relaunch for next frame
     window.requestAnimationFrame(() => {
       this.playingFrame();
     });
   }
 
+  // on pose result (calculate stuff and dispaly them)
   async on_results(results: Results) {
     //console.log(results);
     // console.log(this);

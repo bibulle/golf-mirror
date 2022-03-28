@@ -5,8 +5,10 @@ import { map, Observable } from 'rxjs';
 import { VideoService } from '../video/video.service';
 import * as ViewerSelectors from '../store/viewer/viewer.selectors';
 import * as ViewerActions from '../store/viewer/viewer.actions';
-import { PersonAngles, State, Status, SwingSide, SwingStatus, ViewerState } from '../store/viewer/viewer.state';
+import { PersonAngles, Status, SwingSide, SwingStatus, ViewerState } from '../store/viewer/viewer.state';
 import { BrowserParamsService } from '../utils/browser-params.service';
+import { MyState } from '../store/my-state';
+import { DebugService } from '../store/debug/debug.service';
 
 @Component({
   selector: 'app-viewer',
@@ -14,6 +16,8 @@ import { BrowserParamsService } from '../utils/browser-params.service';
   styleUrls: ['./viewer.component.scss']
 })
 export class ViewerComponent implements OnInit {
+
+  showAngles = false;
 
   status$: Observable<Status>;
   isInitialized$: Observable<boolean>;
@@ -34,9 +38,15 @@ export class ViewerComponent implements OnInit {
 
   constructor(    browserParams: BrowserParamsService,
     private videoService: VideoService,
-    private store: Store<State>,
+    private store: Store<MyState>,
     private route: ActivatedRoute,
+    private debugService: DebugService,
 ) { 
+
+  this.debugService.paramChange$.subscribe(d => {
+    this.showAngles = d.showAngles;
+  })
+
   this.status$ = store.pipe(
     select(ViewerSelectors.viewerStateSelector),
     map((s: ViewerState) => s.status),
