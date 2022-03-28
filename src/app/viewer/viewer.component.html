@@ -1,4 +1,4 @@
-<div class="container-values" [ngClass]="{green: (swingReferencesIsStarted$ | async)}">
+<div *ngIf="showAngles" class="container-values" [ngClass]="{green: (swingReferencesIsStarted$ | async)}">
   <div class="label"><div class="label-1">Status</div><div class="label-2"></div> : <div class="value">{{swingStatus$ | async }}</div></div>
   <div class="label"><div class="label-1">Side</div><div class="label-2"></div> : <div class="value">{{swingSide$ | async }}</div></div>
   <div class="label"><div class="label-1">Started</div><div class="label-2"></div> : <div class="value">{{swingReferencesIsStarted$ | async }}</div></div>

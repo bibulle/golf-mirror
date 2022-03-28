@@ -1,25 +1,48 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { map, Observable, Subject } from 'rxjs';
-import { DebugState, initialState } from './debug.state';
+import { Injectable } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { BehaviorSubject, distinct, map, Observable, Subject, tap } from "rxjs";
+
+export interface DebugState {
+  calculatePoseOff: boolean;
+  showAngles: boolean
+}
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class DebugService {
+  params: DebugState = {
+    calculatePoseOff: false,
+    showAngles: true
+  };
 
-  params: DebugState = initialState; 
+  paramSubject = new BehaviorSubject<DebugState>(this.params);
+  paramChange$: Observable<DebugState>;
 
-    paramSubject = new Subject<DebugState>(this.params);
-    paramChange$: Observable<DebugState>;
+  constructor(private route: ActivatedRoute) {
+    this.paramChange$ = this.paramSubject.asObservable().pipe(distinct(s => JSON.stringify(s)));
+    this.paramSubject.next(this.params);
 
-    constructor(private route: ActivatedRoute) {
-      this.route.queryParams.pipe(
+    this.paramChange$.subscribe((v) => {
+       this.params = v;
+    });
+
+    this.route.queryParams
+      .pipe(
         map((params) => {
-          return Number(params['video']);
-        }),
-      ).subscribe((b) => {
-        console.log(b);
+          const newState:any = { ...this.params };
+
+          Object.keys(newState).forEach(key => {
+            if (params[key] !== undefined) {
+              newState[key] = params[key].toLowerCase() === 'true';
+            }
+          });
+          return newState
+        })
+      )
+      .subscribe((v) => {
+        this.paramSubject.next(v);
       });
-    }
+
+  }
 }

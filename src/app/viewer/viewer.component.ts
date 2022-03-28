@@ -8,6 +8,7 @@ import * as ViewerActions from '../store/viewer/viewer.actions';
 import { PersonAngles, Status, SwingSide, SwingStatus, ViewerState } from '../store/viewer/viewer.state';
 import { BrowserParamsService } from '../utils/browser-params.service';
 import { MyState } from '../store/my-state';
+import { DebugService } from '../store/debug/debug.service';
 
 @Component({
   selector: 'app-viewer',
@@ -15,6 +16,8 @@ import { MyState } from '../store/my-state';
   styleUrls: ['./viewer.component.scss']
 })
 export class ViewerComponent implements OnInit {
+
+  showAngles = false;
 
   status$: Observable<Status>;
   isInitialized$: Observable<boolean>;
@@ -37,7 +40,13 @@ export class ViewerComponent implements OnInit {
     private videoService: VideoService,
     private store: Store<MyState>,
     private route: ActivatedRoute,
+    private debugService: DebugService,
 ) { 
+
+  this.debugService.paramChange$.subscribe(d => {
+    this.showAngles = d.showAngles;
+  })
+
   this.status$ = store.pipe(
     select(ViewerSelectors.viewerStateSelector),
     map((s: ViewerState) => s.status),
